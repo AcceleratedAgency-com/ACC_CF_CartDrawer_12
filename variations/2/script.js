@@ -2,8 +2,8 @@ window.acceleratedDataQueue = window.acceleratedDataQueue || [];
 window.acceleratedDataQueue.push({
   'ACC_CF_CartDrawer_12': {
     var: {
-      NEW_FREE_SHIPPING_THRESHOLD: 150,
-      DISCOUNT_CODE: 'FreeShipping150',
+      NEW_FREE_SHIPPING_THRESHOLD: 170,
+      DISCOUNT_CODE: 'FreeShipping170',
       SESSION_FORCED_KEY: 'ACC_CF_CartDrawer_12_forced_once',
     },
     getCartJson: function () {
