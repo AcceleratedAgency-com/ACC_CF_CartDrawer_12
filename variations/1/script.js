@@ -38,7 +38,7 @@ window.acceleratedDataQueue.push({
 
                     const leftCents = this.var.NEW_FREE_SHIPPING_THRESHOLD * 100 - cart.total_price;
                     const safeLeftCents = leftCents > 0 ? leftCents : 0;
-                    const leftValue = (safeLeftCents / 100).toFixed(0);
+                    const leftValue = (safeLeftCents / 100).toFixed(2);
 
                     const leftSpan = el.querySelector('[data-left-to-spend]');
                     if (leftSpan) {
