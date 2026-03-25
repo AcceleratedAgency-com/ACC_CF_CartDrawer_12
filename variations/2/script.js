@@ -5,8 +5,12 @@ window.acceleratedDataQueue.push({
             NEW_FREE_SHIPPING_THRESHOLD: 170,
             DISCOUNT_CODE: 'FreeShipping170',
             SESSION_FORCED_KEY: 'ACC_CF_CartDrawer_12_forced_once_v2',
+
+            get ['/']() {
+                return window.Shopify?.routes?.root || '/';
+            },
             get currency() {
-                return window.Shopify?.currency?.active || 'AUD';
+                return window.Shopify?.currency?.active;
             },
             get currencyRate() {
                 return Number(window.Shopify?.currency?.rate) || 1;
@@ -14,21 +18,14 @@ window.acceleratedDataQueue.push({
             get freeShippingThresholdCents() {
                 return Math.round(this.NEW_FREE_SHIPPING_THRESHOLD * this.currencyRate * 100);
             },
-            get locale() {
-                return window.Shopify?.locale || 'en';
-            },
-            get country() {
-                return window.Shopify?.country || 'AU';
-            },
-            get numberLocale() {
-                return `${this.locale}-${this.country}`;
-            },
             refPriceFormat: '',
         },
 
         currencyFormat: function (n, fractionDigits = 2) {
             const currency = this.var.currency || 'AUD';
-            const formatted = Intl.NumberFormat(this.var.numberLocale, {
+            const locale = this.var.locale || 'en';
+            const country = this.var.country || 'AU';
+            return Intl.NumberFormat(`${locale}-${country}`, {
                 style: 'currency',
                 currency: currency,
                 currencyDisplay: 'narrowSymbol',
@@ -37,15 +34,8 @@ window.acceleratedDataQueue.push({
                 minimumIntegerDigits: 1,
                 useGrouping: true,
             }).format(n);
-
-            // Normalize decimal separator to comma for EUR 
-            const fixedFormatted =
-                this.var.currency === 'EUR' && fractionDigits === 2
-                    ? formatted.replace(/(\d)\.(\d{2})$/, '$1,$2')
-                    : formatted;
-
-            return `${fixedFormatted} ${currency}`;
         },
+
 
         formatPrice(n) {
             if (!+n) return '';
@@ -105,11 +95,7 @@ window.acceleratedDataQueue.push({
 
                     el.setAttribute(
                         'data-free-shipping-limit',
-                        (() => {
-                            let v = String((this.var.freeShippingThresholdCents / 100).toFixed(2));
-                            if (this.var.currency === 'EUR') v = v.replace('.', ',');
-                            return v;
-                        })()
+                        String((this.var.freeShippingThresholdCents / 100).toFixed(2))
                     );
 
                     if (!cart || typeof cart.total_price !== 'number') {
@@ -136,7 +122,11 @@ window.acceleratedDataQueue.push({
                     const leftCents = thresholdActiveCents - cartActiveCents;
                     const safeLeftActiveCents = leftCents > 0 ? leftCents : 0;
                     const decimals = safeLeftActiveCents % 100 === 0 ? 0 : 2;
-                    const leftValue = this.currencyFormat(safeLeftActiveCents / 100, decimals);
+                    const leftValueRaw = this.currencyFormat(safeLeftActiveCents / 100, decimals);
+                    const leftValue =
+                        this.var.currency === 'EUR'
+                            ? leftValueRaw.replace(/(\d)\.(\d{2})/, '$1,$2')
+                            : leftValueRaw;
 
 
                     const leftSpan = el.querySelector('[data-left-to-spend]');
